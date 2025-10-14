@@ -1,15 +1,17 @@
-package com.adavie.server;
+package com.adavie.server.config;
 
-public class ServerConfig {
+public final class ServerConfig {
 
   private final String hostname;
   private final int port;
   private final int clientConnectionTimeout;
+  private final ThreadPoolConfig threadPoolConfig;
 
   private ServerConfig(Builder builder) {
     this.hostname = builder.hostname;
     this.port = builder.port;
     this.clientConnectionTimeout = builder.clientConnectionTimeout;
+    this.threadPoolConfig = builder.threadPoolConfig;
   }
 
   public static ServerConfig getDefaultServerConfig() {
@@ -24,6 +26,10 @@ public class ServerConfig {
     return port;
   }
 
+  public ThreadPoolConfig getThreadPoolConfig() {
+    return threadPoolConfig;
+  }
+
   public int getClientConnectionTimeout() {
     return clientConnectionTimeout;
   }
@@ -32,6 +38,7 @@ public class ServerConfig {
     private String hostname = "localhost";
     private int port = 8081;
     private int clientConnectionTimeout = 30;
+    private ThreadPoolConfig threadPoolConfig;
 
     public Builder() {}
 
@@ -79,7 +86,15 @@ public class ServerConfig {
       return this;
     }
 
+    public Builder threadPoolConfig(int ThreadPoolConfig) {
+      this.threadPoolConfig = threadPoolConfig;
+      return this;
+    }
+
     public ServerConfig build() {
+      if(this.threadPoolConfig == null) {
+        this.threadPoolConfig = new ThreadPoolConfig.Builder().build();
+      }
       return new ServerConfig(this);
     }
   }

@@ -1,4 +1,4 @@
-package com.adavie.server;
+package com.adavie.server.config;
 
 import org.junit.jupiter.api.Test;
 
@@ -138,5 +138,24 @@ class ServerConfigTest {
         assertEquals("localhost", config.getHostname());
         assertEquals(8081, config.getPort());
         assertEquals(30, config.getClientConnectionTimeout());
+    }
+
+    @Test
+    void testDefaultServerConfigHasThreadPool() {
+        ServerConfig config = ServerConfig.getDefaultServerConfig();
+        assertNotNull(config.getThreadPoolConfig());
+    }
+
+    @Test
+    void testDefaultThreadPoolConfig() {
+        ServerConfig config = new ServerConfig.Builder().build();
+        ThreadPoolConfig threadPoolConfig = config.getThreadPoolConfig();
+
+        assertNotNull(threadPoolConfig);
+        // Verify default ThreadPoolConfig values are used
+        assertEquals(50, threadPoolConfig.getMinPoolSize());
+        assertEquals(150, threadPoolConfig.getMaxPoolSize());
+        assertEquals(60L, threadPoolConfig.getKeepAliveSeconds());
+        assertEquals(20, threadPoolConfig.getQueueSize());
     }
 }

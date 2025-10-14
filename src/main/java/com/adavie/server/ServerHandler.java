@@ -1,6 +1,7 @@
 package com.adavie.server;
 
 import com.adavie.request.ClientHandler;
+import com.adavie.server.config.ServerConfig;
 import com.adavie.util.ThreadPoolFactory;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ class ServerHandler implements Runnable {
       this.bindException = e;
     }
 
-    ThreadPoolExecutor threadPoolExecutor = ThreadPoolFactory.newThreadPool();
+    ThreadPoolExecutor threadPoolExecutor = ThreadPoolFactory.newThreadPool(serverConfig.getThreadPoolConfig());
 
     try {
       while (!serverSocket.isClosed()) {
@@ -43,7 +44,7 @@ class ServerHandler implements Runnable {
 
           clientSocket.setSoTimeout(serverConfig.getClientConnectionTimeout());
 
-          ClientHandler requestHandler =  ClientHandler.createRequestHandler(clientSocket);
+          ClientHandler requestHandler = ClientHandler.createRequestHandler(clientSocket);
 
           threadPoolExecutor.execute(requestHandler);
 
