@@ -1,10 +1,17 @@
-package com.adavie.server.config;
+package com.adavie.config;
 
 public final class ThreadPoolConfig {
-  private int minPoolSize;
-  private int maxPoolSize;
-  private long keepAliveSeconds;
-  private int queueSize;
+  public static final int DEFAULT_MIN_POOL_SIZE = 50;
+  public static final int DEFAULT_MAX_POOL_SIZE = 150;
+  public static final int DEFAULT_QUEUE_SIZE = 20;
+  public static final long DEFAULT_KEEPALIVE_SECONDS = 60L;
+  public static final boolean DEFAULT_VIRTUAL_THREADS = true;
+
+  private final int minPoolSize;
+  private final int maxPoolSize;
+  private final long keepAliveSeconds;
+  private final int queueSize;
+  private final boolean virtualThreads;
 
   public int getMinPoolSize() {
     return minPoolSize;
@@ -22,18 +29,24 @@ public final class ThreadPoolConfig {
     return queueSize;
   }
 
+  public boolean isVirtualThreads() {
+    return virtualThreads;
+  }
+
   private ThreadPoolConfig(Builder builder) {
     this.minPoolSize = builder.minPoolSize;
     this.maxPoolSize = builder.maxPoolSize;
     this.keepAliveSeconds = builder.keepAliveSeconds;
     this.queueSize = builder.queueSize;
+    this.virtualThreads = builder.virtualThreads;
   }
 
   public static class Builder {
-    private int minPoolSize = 50;
-    private int maxPoolSize = 150;
-    private long keepAliveSeconds = 60L;
-    private int queueSize = 20;
+    private int minPoolSize = DEFAULT_MIN_POOL_SIZE;
+    private int maxPoolSize = DEFAULT_MAX_POOL_SIZE;
+    private long keepAliveSeconds = DEFAULT_KEEPALIVE_SECONDS;
+    private int queueSize = DEFAULT_QUEUE_SIZE;
+    private boolean virtualThreads = DEFAULT_VIRTUAL_THREADS;
 
     public Builder minPoolSize(int minPoolSize) {
       if (minPoolSize < 1) {
@@ -76,6 +89,11 @@ public final class ThreadPoolConfig {
         throw new IllegalArgumentException("Queue size cannot exceed 100000");
       }
       this.queueSize = queueSize;
+      return this;
+    }
+
+    public Builder virtualThreads(boolean virtualThreads) {
+      this.virtualThreads = virtualThreads;
       return this;
     }
 

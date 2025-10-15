@@ -1,6 +1,6 @@
 package com.adavie.server;
 
-import com.adavie.server.config.ServerConfig;
+import com.adavie.config.ServerConfig;
 
 import java.io.IOException;
 import java.net.ServerSocket;

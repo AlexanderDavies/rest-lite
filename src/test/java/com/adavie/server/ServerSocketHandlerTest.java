@@ -1,6 +1,6 @@
 package com.adavie.server;
 
-import com.adavie.server.config.ServerConfig;
+import com.adavie.config.ServerConfig;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
