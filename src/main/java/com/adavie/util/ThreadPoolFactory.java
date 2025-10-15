@@ -1,12 +1,67 @@
 package com.adavie.util;
 
-import com.adavie.server.config.ThreadPoolConfig;
+import com.adavie.config.ThreadPoolConfig;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 public class ThreadPoolFactory {
+  private static final Logger LOGGER = Logger.getLogger(ThreadPoolFactory.class.getName());
+  private static final MethodHandle VIRTUAL_THREAD_EXECUTOR_FACTORY;
 
-  public static ThreadPoolExecutor newThreadPool(ThreadPoolConfig threadPoolConfig) {
-    return new ThreadPoolExecutor(threadPoolConfig.getMinPoolSize(), threadPoolConfig.getMaxPoolSize(), threadPoolConfig.getKeepAliveSeconds(), TimeUnit.SECONDS, new LinkedBlockingQueue<>(threadPoolConfig.getQueueSize()));
+  static {
+    MethodHandle handle = null;
+    try {
+      handle = MethodHandles.lookup().findStatic(
+          Executors.class,
+          "newVirtualThreadPerTaskExecutor",
+          MethodType.methodType(ExecutorService.class)
+      );
+    } catch (NoSuchMethodException | IllegalAccessException e) {
+      // Virtual threads not available
+    }
+    VIRTUAL_THREAD_EXECUTOR_FACTORY = handle;
+  }
+
+  public static ExecutorService newExecutorService(ThreadPoolConfig config) {
+    if (config.isVirtualThreads() && VIRTUAL_THREAD_EXECUTOR_FACTORY != null) {
+      if (hasNonDefaultPoolConfig(config)) {
+        LOGGER.warning(
+            "Virtual threads are enabled. Pool configuration (minPoolSize="
+                + config.getMinPoolSize() + ", maxPoolSize=" + config.getMaxPoolSize()
+                + ", queueSize=" + config.getQueueSize() + ", keepAliveSeconds="
+                + config.getKeepAliveSeconds() + ") will be ignored. "
+                + "Set virtualThreads(false) to use platform thread pool configuration."
+        );
+      }
+      return newVirtualThreadExecutor();
+    }
+
+    // Fall back to platform threads
+    return new ThreadPoolExecutor(
+        config.getMinPoolSize(),
+        config.getMaxPoolSize(),
+        config.getKeepAliveSeconds(),
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(config.getQueueSize())
+    );
+  }
+
+  private static boolean hasNonDefaultPoolConfig(ThreadPoolConfig config) {
+    return config.getMinPoolSize() != ThreadPoolConfig.DEFAULT_MIN_POOL_SIZE
+        || config.getMaxPoolSize() != ThreadPoolConfig.DEFAULT_MAX_POOL_SIZE
+        || config.getQueueSize() != ThreadPoolConfig.DEFAULT_QUEUE_SIZE
+        || config.getKeepAliveSeconds() != ThreadPoolConfig.DEFAULT_KEEPALIVE_SECONDS;
+  }
+
+  private static ExecutorService newVirtualThreadExecutor() {
+    try {
+      return (ExecutorService) VIRTUAL_THREAD_EXECUTOR_FACTORY.invoke();
+    } catch (Throwable e) {
+      throw new RuntimeException("Failed to create virtual thread executor", e);
+    }
   }
 }

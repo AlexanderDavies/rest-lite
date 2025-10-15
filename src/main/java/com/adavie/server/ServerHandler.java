@@ -1,7 +1,7 @@
 package com.adavie.server;
 
 import com.adavie.request.ClientHandler;
-import com.adavie.server.config.ServerConfig;
+import com.adavie.config.ServerConfig;
 import com.adavie.util.ThreadPoolFactory;
 
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 class ServerHandler implements Runnable {
@@ -35,7 +35,7 @@ class ServerHandler implements Runnable {
       this.bindException = e;
     }
 
-    ThreadPoolExecutor threadPoolExecutor = ThreadPoolFactory.newThreadPool(serverConfig.getThreadPoolConfig());
+    ExecutorService executorService = ThreadPoolFactory.newExecutorService(serverConfig.getThreadPoolConfig());
 
     try {
       while (!serverSocket.isClosed()) {
@@ -46,27 +46,27 @@ class ServerHandler implements Runnable {
 
           ClientHandler requestHandler = ClientHandler.createRequestHandler(clientSocket);
 
-          threadPoolExecutor.execute(requestHandler);
+          executorService.execute(requestHandler);
 
         } catch (IOException ex) {
           System.out.println("Exception accepting client connection.");
         }
       }
     } finally {
-      shutdownThreadPool(threadPoolExecutor);
+      shutdownExecutorService(executorService);
     }
   }
 
-  private void shutdownThreadPool(ThreadPoolExecutor threadPoolExecutor) {
+  private void shutdownExecutorService(ExecutorService executorService) {
 
-    threadPoolExecutor.shutdown();
+    executorService.shutdown();
     try {
-      if (!threadPoolExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
+      if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
         System.out.println("Threads didn't finish in 30s, forcing shutdown");
-        threadPoolExecutor.shutdownNow();
+        executorService.shutdownNow();
       }
     } catch (InterruptedException ex) {
-      threadPoolExecutor.shutdownNow();
+      executorService.shutdownNow();
     }
   }
 }

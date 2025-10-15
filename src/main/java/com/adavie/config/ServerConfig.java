@@ -1,4 +1,4 @@
-package com.adavie.server.config;
+package com.adavie.config;
 
 public final class ServerConfig {
 

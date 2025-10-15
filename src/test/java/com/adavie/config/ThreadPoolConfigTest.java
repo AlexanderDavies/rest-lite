@@ -1,5 +1,6 @@
-package com.adavie.server.config;
+package com.adavie.config;
 
+import com.adavie.config.ThreadPoolConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -211,5 +212,73 @@ class ThreadPoolConfigTest {
         assertNotNull(config1);
         assertNotNull(config2);
         assertNotSame(config1, config2);
+    }
+
+    @Test
+    void testVirtualThreadsDefaultTrue() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder().build();
+        assertTrue(config.isVirtualThreads());
+    }
+
+    @Test
+    void testVirtualThreadsSetToFalse() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder()
+            .virtualThreads(false)
+            .build();
+        assertFalse(config.isVirtualThreads());
+    }
+
+    @Test
+    void testVirtualThreadsSetToTrue() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder()
+            .virtualThreads(true)
+            .build();
+        assertTrue(config.isVirtualThreads());
+    }
+
+    @Test
+    void testVirtualThreadsWithCustomPoolConfig() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder()
+            .minPoolSize(25)
+            .maxPoolSize(200)
+            .keepAliveSeconds(120L)
+            .queueSize(50)
+            .virtualThreads(true)
+            .build();
+
+        assertEquals(25, config.getMinPoolSize());
+        assertEquals(200, config.getMaxPoolSize());
+        assertEquals(120L, config.getKeepAliveSeconds());
+        assertEquals(50, config.getQueueSize());
+        assertTrue(config.isVirtualThreads());
+    }
+
+    @Test
+    void testVirtualThreadsDisabledWithCustomPoolConfig() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder()
+            .minPoolSize(25)
+            .maxPoolSize(200)
+            .keepAliveSeconds(120L)
+            .queueSize(50)
+            .virtualThreads(false)
+            .build();
+
+        assertEquals(25, config.getMinPoolSize());
+        assertEquals(200, config.getMaxPoolSize());
+        assertEquals(120L, config.getKeepAliveSeconds());
+        assertEquals(50, config.getQueueSize());
+        assertFalse(config.isVirtualThreads());
+    }
+
+    @Test
+    void testBuilderChainingWithVirtualThreads() {
+        assertDoesNotThrow(() -> new ThreadPoolConfig.Builder()
+            .minPoolSize(10)
+            .maxPoolSize(100)
+            .keepAliveSeconds(120L)
+            .queueSize(50)
+            .virtualThreads(false)
+            .build()
+        );
     }
 }

@@ -1,5 +1,7 @@
-package com.adavie.server.config;
+package com.adavie.config;
 
+import com.adavie.config.ServerConfig;
+import com.adavie.config.ThreadPoolConfig;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
