@@ -11,17 +11,19 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
   - Port (default: 8081)
   - Client connection timeout
   - Thread pool configuration
+  - Logging
 - ✅ Server shutdown with connection cleanup
 - ✅ Thread-based request handling
 
 ### Planned
-- Headers management
+- Logging
+- Loading properties from config file
+- Parsing of headers
 - Route registration and routing
 - JSON parsing and mapping
 - Path parameters
 - Virtual threads support
 - HTTPS support
-- Custom logging
 - Cookie handling
 
 ## Installation
