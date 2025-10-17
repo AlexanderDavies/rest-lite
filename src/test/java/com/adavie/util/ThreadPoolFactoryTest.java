@@ -64,9 +64,6 @@ class ThreadPoolFactoryTest {
         ExecutorService executor = ThreadPoolFactory.newExecutorService(config);
 
         assertNotNull(executor);
-        // On Java 21+, this should be a virtual thread executor
-        // On earlier versions, it falls back to ThreadPoolExecutor
-        // We just verify it's created successfully
 
         executor.shutdown();
     }
@@ -81,7 +78,6 @@ class ThreadPoolFactoryTest {
             .virtualThreads(true)
             .build();
 
-        // Capture log warnings
         TestLogHandler logHandler = new TestLogHandler();
         Logger logger = Logger.getLogger(ThreadPoolFactory.class.getName());
         logger.addHandler(logHandler);
@@ -90,8 +86,6 @@ class ThreadPoolFactoryTest {
 
         assertNotNull(executor);
 
-        // If running on Java 21+ with virtual threads available, we should see a warning
-        // because custom pool config is being ignored
         if (isJava21OrHigher()) {
             assertTrue(logHandler.hasWarning(), "Expected warning about ignored pool configuration");
             assertTrue(logHandler.getWarningMessage().contains("Pool configuration"),
@@ -139,7 +133,6 @@ class ThreadPoolFactoryTest {
 
         assertNotNull(executor);
 
-        // No warning should be logged when using default config
         assertFalse(logHandler.hasWarning(),
             "No warning should be logged when using default pool configuration");
 
@@ -157,7 +150,6 @@ class ThreadPoolFactoryTest {
 
         ExecutorService executor = ThreadPoolFactory.newExecutorService(config);
 
-        // Submit a simple task
         java.util.concurrent.Future<String> future = executor.submit(() -> "Task completed");
 
         assertEquals("Task completed", future.get());
@@ -169,7 +161,6 @@ class ThreadPoolFactoryTest {
         return Runtime.version().feature() >= 21;
     }
 
-    // Helper class to capture log messages during tests
     private static class TestLogHandler extends Handler {
         private LogRecord lastWarning;
 

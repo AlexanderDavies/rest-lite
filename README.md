@@ -16,13 +16,11 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
 - ✅ Thread-based request handling
 
 ### Planned
-- Logging
 - Loading properties from config file
 - Parsing of headers
 - Route registration and routing
 - JSON parsing and mapping
 - Path parameters
-- Virtual threads support
 - HTTPS support
 - Cookie handling
 
@@ -116,6 +114,42 @@ public class Main {
 }
 ```
 
+### Custom Logger Configuration
+
+Configure the root logger with custom settings for file logging:
+
+```java
+import com.adavie.server.Server;
+import com.adavie.server.config.ServerConfig;
+import com.adavie.config.LoggerConfig;
+import java.util.logging.Level;
+
+public class Main {
+    public static void main(String[] args) {
+        // Create custom logger configuration
+        LoggerConfig loggerConfig = new LoggerConfig.Builder()
+            .enabledFileLogging(true)
+            .logFilePath("/var/log/myapp/server.log")
+            .logLevel(Level.INFO)
+            .fileLimitBytes(5242880)  // 5MB per file
+            .fileCount(10)            // Keep 10 log files
+            .build();
+
+        // Create server config with custom logger
+        ServerConfig config = new ServerConfig.Builder()
+            .hostname("localhost")
+            .port(9090)
+            .loggerConfig(loggerConfig)
+            .build();
+
+        Server server = new Server(config);
+        server.start();
+
+        System.out.println("Server running with custom logging configuration");
+    }
+}
+```
+
 ### Configuration Options
 
 #### ServerConfig
@@ -129,6 +163,13 @@ public class Main {
 - **maxPoolSize**: Maximum number of threads in the pool, range 1-10000 (default: `150`)
 - **keepAliveSeconds**: Time in seconds that idle threads stay alive, range 0-86400 (default: `60`)
 - **queueSize**: Size of the work queue, range 0-100000 or -1 for unbounded (default: `20`)
+
+#### LoggerConfig
+- **enableFileLogging**: Enable or disable file logging (default: `true`)
+- **logFilePath**: Path to the log file, max 255 characters (default: `/logs/app.log`)
+- **logLevel**: Logging level (default: `Level.ALL`)
+- **fileLimitBytes**: Maximum size of each log file in bytes, range 1KB-1GB (default: `10485760` - 10MB)
+- **fileCount**: Number of log files to rotate through, range 1-100 (default: `5`)
 
 ## Running the Project
 

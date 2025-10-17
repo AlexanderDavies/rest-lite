@@ -40,6 +40,10 @@ public class LoggerConfig {
     return fileLimitBytes;
   }
 
+  public String getLogFilePath() {
+    return logFilePath;
+  }
+
   public int getFileCount() {
     return fileCount;
   }
@@ -107,7 +111,7 @@ public class LoggerConfig {
       return this;
     }
 
-    public LoggerConfig Build() {
+    public LoggerConfig build() {
       return new LoggerConfig(this);
     }
   }

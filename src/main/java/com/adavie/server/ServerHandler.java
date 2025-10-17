@@ -11,11 +11,14 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class ServerHandler implements Runnable {
   private final ServerSocket serverSocket;
   private final ServerConfig serverConfig;
   private IOException bindException;
+  private static final Logger LOGGER = Logger.getLogger(ServerHandler.class.getName());
 
   public ServerHandler(ServerSocket serverSocket, ServerConfig serverConfig) {
     this.serverSocket = serverSocket;
@@ -48,8 +51,8 @@ class ServerHandler implements Runnable {
 
           executorService.execute(requestHandler);
 
-        } catch (IOException ex) {
-          System.out.println("Exception accepting client connection.");
+        } catch (IOException e) {
+          LOGGER.warning("Exception accepting client connection.");
         }
       }
     } finally {
@@ -62,10 +65,10 @@ class ServerHandler implements Runnable {
     executorService.shutdown();
     try {
       if (!executorService.awaitTermination(30, TimeUnit.SECONDS)) {
-        System.out.println("Threads didn't finish in 30s, forcing shutdown");
+        LOGGER.warning("Threads didn't finish in 30s, forcing shutdown");
         executorService.shutdownNow();
       }
-    } catch (InterruptedException ex) {
+    } catch (InterruptedException e) {
       executorService.shutdownNow();
     }
   }
