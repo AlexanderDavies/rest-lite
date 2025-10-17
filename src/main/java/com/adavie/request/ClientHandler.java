@@ -3,10 +3,13 @@ package com.adavie.request;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class ClientHandler implements Runnable {
 
   private final Socket clientSocket;
+  private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
+
 
   private ClientHandler(Socket clientSocket) {
     this.clientSocket = clientSocket;
@@ -39,8 +42,8 @@ public class ClientHandler implements Runnable {
     if (!clientSocket.isClosed()) {
       try {
         clientSocket.close();
-      } catch (IOException ex) {
-        System.out.println("Failed to close client connection");
+      } catch (IOException e) {
+        LOGGER.warning("Failed to close client connection on port:" + clientSocket.getPort());
       }
     }
   }

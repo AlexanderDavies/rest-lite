@@ -1,11 +1,7 @@
 package com.adavie.config;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.logging.Level;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +10,7 @@ class LoggerConfigTest {
 
     @Test
     void testDefaultConfiguration() {
-        LoggerConfig config = new LoggerConfig.Builder().Build();
+        LoggerConfig config = new LoggerConfig.Builder().build();
 
         assertTrue(config.isEnableFileLogging());
         assertEquals("/logs/app.log", config.isLogFilePath());
@@ -23,45 +19,39 @@ class LoggerConfigTest {
         assertEquals(5, config.getFileCount());
     }
 
-    // ===== Log Level Validations =====
-
     @Test
     void testValidLogLevels() {
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.ALL).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINEST).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINER).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINE).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.CONFIG).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.INFO).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.WARNING).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.SEVERE).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.OFF).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.ALL).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINEST).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINER).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.FINE).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.CONFIG).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.INFO).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.WARNING).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.SEVERE).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logLevel(Level.OFF).build());
     }
 
     @Test
     void testNullLogLevel() {
-        // The current implementation doesn't validate null log level
-        // This test documents current behavior
-        LoggerConfig config = new LoggerConfig.Builder().logLevel(null).Build();
+        LoggerConfig config = new LoggerConfig.Builder().logLevel(null).build();
         assertNull(config.getLogLevel());
     }
 
-    // ===== File Path Validations =====
-
     @Test
     void testValidFilePaths() {
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("app.log").Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("/var/log/app.log").Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("./logs/app.log").Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("../logs/app.log").Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("C:\\logs\\app.log").Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("app.log").build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("/var/log/app.log").build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("./logs/app.log").build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("../logs/app.log").build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath("C:\\logs\\app.log").build());
     }
 
     @Test
     void testEmptyFilePathThrowsException() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().logFilePath("").Build()
+            () -> new LoggerConfig.Builder().logFilePath("").build()
         );
         assertEquals("Log file path must be specified when file logging is enabled", exception.getMessage());
     }
@@ -70,7 +60,7 @@ class LoggerConfigTest {
     void testWhitespaceOnlyFilePathThrowsException() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().logFilePath("   ").Build()
+            () -> new LoggerConfig.Builder().logFilePath("   ").build()
         );
         assertEquals("Log file path must be specified when file logging is enabled", exception.getMessage());
     }
@@ -79,7 +69,7 @@ class LoggerConfigTest {
     void testFilePathTrimsWhitespace() {
         LoggerConfig config = new LoggerConfig.Builder()
             .logFilePath("  /var/log/app.log  ")
-            .Build();
+            .build();
         assertEquals("/var/log/app.log", config.isLogFilePath());
     }
 
@@ -88,7 +78,7 @@ class LoggerConfigTest {
         String longPath = "a".repeat(256);
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().logFilePath(longPath).Build()
+            () -> new LoggerConfig.Builder().logFilePath(longPath).build()
         );
         assertEquals("Log file path exceeds maximum length of 255 characters", exception.getMessage());
     }
@@ -96,31 +86,29 @@ class LoggerConfigTest {
     @Test
     void testFilePathExactly255Characters() {
         String exactPath = "a".repeat(255);
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath(exactPath).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().logFilePath(exactPath).build());
     }
 
     @Test
     void testFilePathWith254Characters() {
         String exactPath = "a".repeat(254);
-        LoggerConfig config = new LoggerConfig.Builder().logFilePath(exactPath).Build();
+        LoggerConfig config = new LoggerConfig.Builder().logFilePath(exactPath).build();
         assertEquals(254, config.isLogFilePath().length());
     }
 
-    // ===== File Limit Bytes Validations =====
-
     @Test
     void testValidFileLimitBytes() {
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024).Build()); // 1KB minimum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024).Build()); // 1MB
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(10 * 1024 * 1024).Build()); // 10MB
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024).Build()); // 1GB maximum
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024).build()); // 1KB minimum
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024).build()); // 1MB
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(10 * 1024 * 1024).build()); // 10MB
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024).build()); // 1GB maximum
     }
 
     @Test
     void testFileLimitBytesZero() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileLimitBytes(0).Build()
+            () -> new LoggerConfig.Builder().fileLimitBytes(0).build()
         );
         assertEquals("File limit must be positive, got: 0", exception.getMessage());
     }
@@ -129,7 +117,7 @@ class LoggerConfigTest {
     void testFileLimitBytesNegative() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileLimitBytes(-1).Build()
+            () -> new LoggerConfig.Builder().fileLimitBytes(-1).build()
         );
         assertEquals("File limit must be positive, got: -1", exception.getMessage());
     }
@@ -138,14 +126,14 @@ class LoggerConfigTest {
     void testFileLimitBytesTooSmall() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileLimitBytes(1023).Build()
+            () -> new LoggerConfig.Builder().fileLimitBytes(1023).build()
         );
         assertEquals("File limit too small, minimum is 1024 bytes (1KB)", exception.getMessage());
     }
 
     @Test
     void testFileLimitBytesExactlyMinimum() {
-        LoggerConfig config = new LoggerConfig.Builder().fileLimitBytes(1024).Build();
+        LoggerConfig config = new LoggerConfig.Builder().fileLimitBytes(1024).build();
         assertEquals(1024, config.getFileLimitBytes());
     }
 
@@ -153,32 +141,30 @@ class LoggerConfigTest {
     void testFileLimitBytesTooLarge() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024 + 1).Build()
+            () -> new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024 + 1).build()
         );
         assertEquals("File limit too large, maximum is 1GB", exception.getMessage());
     }
 
     @Test
     void testFileLimitBytesExactlyMaximum() {
-        LoggerConfig config = new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024).Build();
+        LoggerConfig config = new LoggerConfig.Builder().fileLimitBytes(1024 * 1024 * 1024).build();
         assertEquals(1024 * 1024 * 1024, config.getFileLimitBytes());
     }
 
-    // ===== File Count Validations =====
-
     @Test
     void testValidFileCount() {
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(1).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(5).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(50).Build());
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(100).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(1).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(5).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(50).build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(100).build());
     }
 
     @Test
     void testFileCountZero() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileCount(0).Build()
+            () -> new LoggerConfig.Builder().fileCount(0).build()
         );
         assertEquals("File count must be positive, got: 0", exception.getMessage());
     }
@@ -187,7 +173,7 @@ class LoggerConfigTest {
     void testFileCountNegative() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileCount(-5).Build()
+            () -> new LoggerConfig.Builder().fileCount(-5).build()
         );
         assertEquals("File count must be positive, got: -5", exception.getMessage());
     }
@@ -196,30 +182,28 @@ class LoggerConfigTest {
     void testFileCountTooLarge() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileCount(101).Build()
+            () -> new LoggerConfig.Builder().fileCount(101).build()
         );
         assertEquals("File count too large, maximum is 100 files", exception.getMessage());
     }
 
     @Test
     void testFileCountExactlyMaximum() {
-        LoggerConfig config = new LoggerConfig.Builder().fileCount(100).Build();
+        LoggerConfig config = new LoggerConfig.Builder().fileCount(100).build();
         assertEquals(100, config.getFileCount());
     }
 
     @Test
     void testFileCountExactlyMinimum() {
-        LoggerConfig config = new LoggerConfig.Builder().fileCount(1).Build();
+        LoggerConfig config = new LoggerConfig.Builder().fileCount(1).build();
         assertEquals(1, config.getFileCount());
     }
-
-    // ===== File Logging Enable/Disable =====
 
     @Test
     void testFileLoggingEnabled() {
         LoggerConfig config = new LoggerConfig.Builder()
             .enabledFileLogging(true)
-            .Build();
+            .build();
         assertTrue(config.isEnableFileLogging());
     }
 
@@ -227,11 +211,9 @@ class LoggerConfigTest {
     void testFileLoggingDisabled() {
         LoggerConfig config = new LoggerConfig.Builder()
             .enabledFileLogging(false)
-            .Build();
+            .build();
         assertFalse(config.isEnableFileLogging());
     }
-
-    // ===== Builder Method Chaining =====
 
     @Test
     void testBuilderMethodChaining() {
@@ -241,7 +223,7 @@ class LoggerConfigTest {
             .logLevel(Level.INFO)
             .fileLimitBytes(5 * 1024 * 1024)
             .fileCount(10)
-            .Build();
+            .build();
 
         assertTrue(config.isEnableFileLogging());
         assertEquals("test.log", config.isLogFilePath());
@@ -250,17 +232,15 @@ class LoggerConfigTest {
         assertEquals(10, config.getFileCount());
     }
 
-    // ===== Edge Cases =====
-
     @Test
     void testFilePathWithSpecialCharacters() {
         assertDoesNotThrow(() -> new LoggerConfig.Builder()
             .logFilePath("app-log_2024.log")
-            .Build()
+            .build()
         );
         assertDoesNotThrow(() -> new LoggerConfig.Builder()
             .logFilePath("/var/log/app-2024-01-01.log")
-            .Build()
+            .build()
         );
     }
 
@@ -270,10 +250,9 @@ class LoggerConfigTest {
             .logLevel(Level.WARNING)
             .fileLimitBytes(2048);
 
-        LoggerConfig config1 = builder.Build();
-        LoggerConfig config2 = builder.Build();
+        LoggerConfig config1 = builder.build();
+        LoggerConfig config2 = builder.build();
 
-        // Both configs should have the same values
         assertEquals(Level.WARNING, config1.getLogLevel());
         assertEquals(Level.WARNING, config2.getLogLevel());
         assertEquals(2048, config1.getFileLimitBytes());
@@ -282,56 +261,44 @@ class LoggerConfigTest {
 
     @Test
     void testBoundaryValueForFileLimitBytes() {
-        // Test just below minimum
         assertThrows(IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileLimitBytes(1023).Build()
+            () -> new LoggerConfig.Builder().fileLimitBytes(1023).build()
         );
 
-        // Test at minimum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1024).build());
 
-        // Test just above minimum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1025).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileLimitBytes(1025).build());
 
-        // Test just below maximum
         assertDoesNotThrow(() -> new LoggerConfig.Builder()
-            .fileLimitBytes(1024 * 1024 * 1024 - 1).Build()
+            .fileLimitBytes(1024 * 1024 * 1024 - 1).build()
         );
 
-        // Test at maximum
         assertDoesNotThrow(() -> new LoggerConfig.Builder()
-            .fileLimitBytes(1024 * 1024 * 1024).Build()
+            .fileLimitBytes(1024 * 1024 * 1024).build()
         );
 
-        // Test just above maximum
         assertThrows(IllegalArgumentException.class,
             () -> new LoggerConfig.Builder()
-                .fileLimitBytes(1024 * 1024 * 1024 + 1).Build()
+                .fileLimitBytes(1024 * 1024 * 1024 + 1).build()
         );
     }
 
     @Test
     void testBoundaryValueForFileCount() {
-        // Test just below minimum
         assertThrows(IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileCount(0).Build()
+            () -> new LoggerConfig.Builder().fileCount(0).build()
         );
 
-        // Test at minimum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(1).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(1).build());
 
-        // Test just above minimum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(2).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(2).build());
 
-        // Test just below maximum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(99).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(99).build());
 
-        // Test at maximum
-        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(100).Build());
+        assertDoesNotThrow(() -> new LoggerConfig.Builder().fileCount(100).build());
 
-        // Test just above maximum
         assertThrows(IllegalArgumentException.class,
-            () -> new LoggerConfig.Builder().fileCount(101).Build()
+            () -> new LoggerConfig.Builder().fileCount(101).build()
         );
     }
 }

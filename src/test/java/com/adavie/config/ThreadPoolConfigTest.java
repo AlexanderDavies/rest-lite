@@ -10,7 +10,6 @@ class ThreadPoolConfigTest {
     @Test
     void testDefaultValues() {
         ThreadPoolConfig config = new ThreadPoolConfig.Builder().build();
-        // We can't access private fields directly, but we verify construction succeeds
         assertNotNull(config);
     }
 
@@ -178,7 +177,6 @@ class ThreadPoolConfigTest {
 
     @Test
     void testCrossFieldValidationOrder() {
-        // Setting max first, then min that exceeds it
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> new ThreadPoolConfig.Builder()
@@ -280,5 +278,22 @@ class ThreadPoolConfigTest {
             .virtualThreads(false)
             .build()
         );
+    }
+
+    @Test
+    void testIsDefaultWithAllDefaultValues() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder().build();
+        assertFalse(config.isDefault());
+    }
+
+    @Test
+    void testIsDefaultWithMultipleCustomValues() {
+        ThreadPoolConfig config = new ThreadPoolConfig.Builder()
+            .minPoolSize(100)
+            .maxPoolSize(200)
+            .queueSize(100)
+            .keepAliveSeconds(120L)
+            .build();
+        assertTrue(config.isDefault());
     }
 }

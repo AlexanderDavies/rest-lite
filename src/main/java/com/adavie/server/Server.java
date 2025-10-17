@@ -1,28 +1,34 @@
 package com.adavie.server;
 
 import com.adavie.config.ServerConfig;
+import com.adavie.util.LoggerInitializer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
 
   private ServerSocket serverSocket;
   private final ServerConfig serverConfig;
+  private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
   public Server() {
     this.serverConfig = ServerConfig.getDefaultServerConfig();
+    initializeLogger();
   }
 
   public Server(ServerConfig serverConfig) {
     this.serverConfig = serverConfig;
+    initializeLogger();
   }
 
   public void start() {
-    System.out.println("Starting server");
+    LOGGER.info("Starting server on port:" + serverConfig.getPort());
 
     try {
-      this.serverSocket = new ServerSocket();
+      this.serverSocket = createServerSocket();
 
       ServerHandler socketHandler = new ServerHandler(serverSocket, serverConfig);
 
@@ -34,19 +40,22 @@ public class Server {
       }
 
       if(socketHandler.getBindException() != null) {
-        System.out.println("Failed to bind to server");
+        LOGGER.severe("Failed to bind to server");
         throw socketHandler.getBindException();
       }
 
     } catch (IOException | InterruptedException e) {
-      System.out.println(e.getMessage());
       throw new RuntimeException(e);
     }
 
   }
 
-  private ServerSocket createSocket() throws IOException {
+  private ServerSocket createServerSocket() throws IOException {
     return new ServerSocket();
+  }
+
+  private void initializeLogger() {
+    LoggerInitializer.configureRootLogger(this.serverConfig.getLoggerConfig());
   }
 
   public void stop() {
@@ -54,7 +63,7 @@ public class Server {
       try {
         serverSocket.close();
       } catch (IOException e) {
-        System.out.println("Failed to stop server");
+        LOGGER.log(Level.SEVERE,"Failed to stop server", e);
         throw new RuntimeException(e);
       }
     }

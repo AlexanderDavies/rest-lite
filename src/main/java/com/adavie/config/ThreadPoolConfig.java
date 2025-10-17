@@ -33,6 +33,13 @@ public final class ThreadPoolConfig {
     return virtualThreads;
   }
 
+  public boolean isDefault() {
+    return minPoolSize != ThreadPoolConfig.DEFAULT_MIN_POOL_SIZE
+      || maxPoolSize != ThreadPoolConfig.DEFAULT_MAX_POOL_SIZE
+      || queueSize != ThreadPoolConfig.DEFAULT_QUEUE_SIZE
+      || keepAliveSeconds != ThreadPoolConfig.DEFAULT_KEEPALIVE_SECONDS;
+  }
+
   private ThreadPoolConfig(Builder builder) {
     this.minPoolSize = builder.minPoolSize;
     this.maxPoolSize = builder.maxPoolSize;

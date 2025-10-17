@@ -6,12 +6,14 @@ public final class ServerConfig {
   private final int port;
   private final int clientConnectionTimeout;
   private final ThreadPoolConfig threadPoolConfig;
+  private final LoggerConfig loggerConfig;
 
   private ServerConfig(Builder builder) {
     this.hostname = builder.hostname;
     this.port = builder.port;
     this.clientConnectionTimeout = builder.clientConnectionTimeout;
     this.threadPoolConfig = builder.threadPoolConfig;
+    this.loggerConfig = builder.loggerConfig;
   }
 
   public static ServerConfig getDefaultServerConfig() {
@@ -26,19 +28,22 @@ public final class ServerConfig {
     return port;
   }
 
+  public int getClientConnectionTimeout() {
+    return clientConnectionTimeout;
+  }
+
   public ThreadPoolConfig getThreadPoolConfig() {
     return threadPoolConfig;
   }
 
-  public int getClientConnectionTimeout() {
-    return clientConnectionTimeout;
-  }
+  public LoggerConfig getLoggerConfig() {return loggerConfig;}
 
   public static class Builder {
     private String hostname = "localhost";
     private int port = 8081;
     private int clientConnectionTimeout = 30;
     private ThreadPoolConfig threadPoolConfig;
+    private LoggerConfig loggerConfig;
 
     public Builder() {}
 
@@ -86,14 +91,23 @@ public final class ServerConfig {
       return this;
     }
 
-    public Builder threadPoolConfig(int ThreadPoolConfig) {
+    public Builder threadPoolConfig(ThreadPoolConfig threadPoolConfig) {
       this.threadPoolConfig = threadPoolConfig;
+      return this;
+    }
+
+    public Builder loggerConfig(LoggerConfig loggerConfig) {
+      this.loggerConfig = loggerConfig;
       return this;
     }
 
     public ServerConfig build() {
       if(this.threadPoolConfig == null) {
         this.threadPoolConfig = new ThreadPoolConfig.Builder().build();
+      }
+
+      if(this.loggerConfig == null) {
+        this.loggerConfig = new LoggerConfig.Builder().build();
       }
       return new ServerConfig(this);
     }

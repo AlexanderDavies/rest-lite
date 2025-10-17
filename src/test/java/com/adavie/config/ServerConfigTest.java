@@ -4,6 +4,8 @@ import com.adavie.config.ServerConfig;
 import com.adavie.config.ThreadPoolConfig;
 import org.junit.jupiter.api.Test;
 
+import java.util.logging.Level;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ServerConfigTest {
@@ -154,10 +156,42 @@ class ServerConfigTest {
         ThreadPoolConfig threadPoolConfig = config.getThreadPoolConfig();
 
         assertNotNull(threadPoolConfig);
-        // Verify default ThreadPoolConfig values are used
         assertEquals(50, threadPoolConfig.getMinPoolSize());
         assertEquals(150, threadPoolConfig.getMaxPoolSize());
         assertEquals(60L, threadPoolConfig.getKeepAliveSeconds());
         assertEquals(20, threadPoolConfig.getQueueSize());
+    }
+
+    @Test
+    void testDefaultServerConfigHasLoggerConfig() {
+        ServerConfig config = ServerConfig.getDefaultServerConfig();
+        assertNotNull(config.getLoggerConfig());
+    }
+
+    @Test
+    void testCustomLoggerConfig() {
+        LoggerConfig customLoggerConfig = new LoggerConfig.Builder()
+            .enabledFileLogging(false)
+            .logLevel(Level.INFO)
+            .build();
+
+        ServerConfig config = new ServerConfig.Builder()
+            .loggerConfig(customLoggerConfig)
+            .build();
+
+        assertNotNull(config.getLoggerConfig());
+        assertEquals(customLoggerConfig, config.getLoggerConfig());
+        assertFalse(config.getLoggerConfig().isEnableFileLogging());
+        assertEquals(Level.INFO, config.getLoggerConfig().getLogLevel());
+    }
+
+    @Test
+    void testNullLoggerConfigDefaultsToDefault() {
+        ServerConfig config = new ServerConfig.Builder()
+            .loggerConfig(null)
+            .build();
+
+        assertNotNull(config.getLoggerConfig());
+        assertTrue(config.getLoggerConfig().isEnableFileLogging());
     }
 }

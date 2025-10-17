@@ -48,11 +48,9 @@ class ServerTest {
 
     @Test
     void testStopAlreadyStoppedServer() throws InterruptedException {
-        // Stop the server once
         server.stop();
         serverThread.join(1000);
 
-        // Stopping again should not throw an exception
         server.stop();
     }
 
@@ -65,7 +63,6 @@ class ServerTest {
         List<Socket> sockets = new ArrayList<>();
 
         try {
-            // Connect 3 clients simultaneously
             for (int i = 0; i < 3; i++) {
                 Socket socket = new Socket();
                 socket.connect(new InetSocketAddress(host, port), timeoutMs);
@@ -73,7 +70,6 @@ class ServerTest {
                 assertTrue(socket.isConnected(), "Client " + i + " should be connected");
             }
         } finally {
-            // Clean up all sockets
             for (Socket socket : sockets) {
                 if (!socket.isClosed()) {
                     socket.close();
@@ -88,39 +84,32 @@ class ServerTest {
         int port = 8081;
         int timeoutMs = 1000;
 
-        // Connect a client to the server
         Socket clientSocket = new Socket();
         try {
             clientSocket.connect(new InetSocketAddress(host, port), timeoutMs);
             assertTrue(clientSocket.isConnected(), "Client should be connected");
 
-            // Stop the server
             server.stop();
             serverThread.join(1000);
 
-            // Try to read from the socket - should return -1 (EOF) or throw exception
             int result = clientSocket.getInputStream().read();
             assertTrue(result == -1, "Should receive EOF after server closes connection");
 
         } catch (IOException e) {
-            // SocketException is also acceptable - means connection was closed
             assertTrue(e.getMessage().contains("Socket") || e.getMessage().contains("Connection"),
                 "Exception should indicate socket/connection closure");
         } finally {
-            // Clean up
             try {
                 if (!clientSocket.isClosed()) {
                     clientSocket.close();
                 }
             } catch (IOException e) {
-                // Ignore cleanup errors
             }
         }
     }
 
     @Test
     void testPortAlreadyInUse() throws InterruptedException {
-        // Try to start a second server on the same port
         Server secondServer = new Server();
         Thread secondServerThread = new Thread(() -> {
             assertThrows(RuntimeException.class, () -> secondServer.start(),
@@ -130,12 +119,10 @@ class ServerTest {
         secondServerThread.start();
         secondServerThread.join(2000);
 
-        // Verify the original server is still running
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress("localhost", 8081), 1000);
             assertTrue(socket.isConnected(), "Original server should still be running");
         } catch (IOException e) {
-            // Clean up second server if needed
         }
     }
 }

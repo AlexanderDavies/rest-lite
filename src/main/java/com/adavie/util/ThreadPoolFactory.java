@@ -9,7 +9,7 @@ import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 public class ThreadPoolFactory {
-  private static final Logger LOGGER = Logger.getLogger(ThreadPoolFactory.class.getName());
+  private static final Logger logger = Logger.getLogger(ThreadPoolFactory.class.getName());
   private static final MethodHandle VIRTUAL_THREAD_EXECUTOR_FACTORY;
 
   static {
@@ -28,8 +28,8 @@ public class ThreadPoolFactory {
 
   public static ExecutorService newExecutorService(ThreadPoolConfig config) {
     if (config.isVirtualThreads() && VIRTUAL_THREAD_EXECUTOR_FACTORY != null) {
-      if (hasNonDefaultPoolConfig(config)) {
-        LOGGER.warning(
+      if (config.isDefault()) {
+        logger.warning(
             "Virtual threads are enabled. Pool configuration (minPoolSize="
                 + config.getMinPoolSize() + ", maxPoolSize=" + config.getMaxPoolSize()
                 + ", queueSize=" + config.getQueueSize() + ", keepAliveSeconds="
@@ -48,13 +48,6 @@ public class ThreadPoolFactory {
         TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(config.getQueueSize())
     );
-  }
-
-  private static boolean hasNonDefaultPoolConfig(ThreadPoolConfig config) {
-    return config.getMinPoolSize() != ThreadPoolConfig.DEFAULT_MIN_POOL_SIZE
-        || config.getMaxPoolSize() != ThreadPoolConfig.DEFAULT_MAX_POOL_SIZE
-        || config.getQueueSize() != ThreadPoolConfig.DEFAULT_QUEUE_SIZE
-        || config.getKeepAliveSeconds() != ThreadPoolConfig.DEFAULT_KEEPALIVE_SECONDS;
   }
 
   private static ExecutorService newVirtualThreadExecutor() {
