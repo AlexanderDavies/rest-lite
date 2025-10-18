@@ -14,15 +14,23 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
   - Logging
 - ✅ Server shutdown with connection cleanup
 - ✅ Thread-based request handling
+- ✅ Logging
+- ✅ Virtual thread support
 
 ### Planned
-- Loading properties from config file
-- Parsing of headers
-- Route registration and routing
-- JSON parsing and mapping
-- Path parameters
-- HTTPS support
-- Cookie handling
+- Handle clients requests
+- Parse Headers
+- Register routes
+- route requests
+- JSON response parsing
+- Handle path parameters (registration and routing)
+- Handle post requests 
+  - parse JSON body and map to request object
+  - Handle generics
+- Handle Cookies
+- Provide HTTPS support
+- Load properties from config file
+
 
 ## Installation
 
