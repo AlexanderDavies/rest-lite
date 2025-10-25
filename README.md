@@ -5,6 +5,7 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
 ## Features
 
 ### Implemented
+
 - ✅ Base server with client connection support
 - ✅ Configurable server settings:
   - Server address/hostname
@@ -16,10 +17,10 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
 - ✅ Thread-based request handling
 - ✅ Logging
 - ✅ Virtual thread support
+- ✅ Handle clients requests 
+- ✅ Parse Headers
 
 ### Planned
-- Handle clients requests
-- Parse Headers
 - Register routes
 - route requests
 - JSON response parsing

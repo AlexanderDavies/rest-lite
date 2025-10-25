@@ -1,4 +1,8 @@
 package com.adavie.request;
 
-public class Request {
+import java.io.IOException;
+
+public interface Request {
+  public void read() throws IOException, RestException;
+  public void write() throws IOException;
 }
