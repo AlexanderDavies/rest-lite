@@ -1,7 +1,8 @@
 package com.adavie.server;
 
-import com.adavie.request.ClientHandler;
 import com.adavie.config.ServerConfig;
+import com.adavie.request.ClientHandler;
+import com.adavie.router.Routes;
 import com.adavie.util.ThreadPoolFactory;
 
 import java.io.IOException;
@@ -11,18 +12,19 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class ServerHandler implements Runnable {
   private final ServerSocket serverSocket;
   private final ServerConfig serverConfig;
+  private final Routes routes;
   private IOException bindException;
   private static final Logger LOGGER = Logger.getLogger(ServerHandler.class.getName());
 
-  public ServerHandler(ServerSocket serverSocket, ServerConfig serverConfig) {
+  public ServerHandler(ServerSocket serverSocket, ServerConfig serverConfig, Routes routes) {
     this.serverSocket = serverSocket;
     this.serverConfig = serverConfig;
+    this.routes = routes;
   }
 
   public IOException getBindException() {
@@ -47,7 +49,7 @@ class ServerHandler implements Runnable {
 
           clientSocket.setSoTimeout(serverConfig.getClientConnectionTimeout());
 
-          ClientHandler requestHandler = ClientHandler.createRequestHandler(clientSocket);
+          ClientHandler requestHandler = ClientHandler.createRequestHandler(clientSocket, routes);
 
           executorService.execute(requestHandler);
 

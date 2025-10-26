@@ -1,5 +1,7 @@
 package com.adavie.request;
 
+import com.adavie.router.Routes;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.util.logging.Logger;
@@ -7,15 +9,17 @@ import java.util.logging.Logger;
 public class ClientHandler implements Runnable {
 
   private final Socket clientSocket;
+  private final Routes routes;
   private static final Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
 
 
-  private ClientHandler(Socket clientSocket) {
+  private ClientHandler(Socket clientSocket, Routes routes) {
     this.clientSocket = clientSocket;
+    this.routes = routes;
   }
 
-  public static ClientHandler createRequestHandler(Socket clientSocket) {
-    return new ClientHandler(clientSocket);
+  public static ClientHandler createRequestHandler(Socket clientSocket, Routes routes) {
+    return new ClientHandler(clientSocket, routes);
   }
 
   @Override

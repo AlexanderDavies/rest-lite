@@ -1,6 +1,7 @@
 package com.adavie.server;
 
 import com.adavie.config.ServerConfig;
+import com.adavie.router.Routes;
 import com.adavie.util.LoggerInitializer;
 
 import java.io.IOException;
@@ -12,14 +13,17 @@ public class Server {
 
   private ServerSocket serverSocket;
   private final ServerConfig serverConfig;
+  private final Routes routes;
   private static final Logger LOGGER = Logger.getLogger(Server.class.getName());
 
-  public Server() {
+  public Server(Routes routes) {
+    this.routes = routes;
     this.serverConfig = ServerConfig.getDefaultServerConfig();
     initializeLogger();
   }
 
-  public Server(ServerConfig serverConfig) {
+  public Server(Routes routes, ServerConfig serverConfig) {
+    this.routes = routes;
     this.serverConfig = serverConfig;
     initializeLogger();
   }
@@ -30,7 +34,7 @@ public class Server {
     try {
       this.serverSocket = createServerSocket();
 
-      ServerHandler socketHandler = new ServerHandler(serverSocket, serverConfig);
+      ServerHandler socketHandler = new ServerHandler(serverSocket, serverConfig, routes);
 
       Thread thread = new Thread(socketHandler);
       thread.start();

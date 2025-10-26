@@ -14,7 +14,7 @@ import java.time.Duration;
 import static java.net.http.HttpClient.Version.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GetRequests {
+public class GetRequestsTest {
 
   private static Server server;
   private static final URI uri = URI.create("http://localhost:8081/");

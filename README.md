@@ -22,6 +22,8 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
 
 ### Planned
 - Register routes
+  - Need to handle functions with no args
+- Handle query params
 - route requests
 - JSON response parsing
 - Handle path parameters (registration and routing)
