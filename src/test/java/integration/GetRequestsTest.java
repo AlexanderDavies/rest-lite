@@ -1,5 +1,6 @@
 package integration;
 
+import com.adavie.router.Routes;
 import com.adavie.server.Server;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,7 +26,9 @@ public class GetRequestsTest {
 
   @BeforeAll
   static void setUp() {
-    server = new Server();
+    Routes routes = new Routes();
+    routes.add("/", (arg) -> "hello world");
+    server = new Server(routes);
     server.start();
   }
 

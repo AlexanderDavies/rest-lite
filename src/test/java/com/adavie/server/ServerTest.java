@@ -1,5 +1,6 @@
 package com.adavie.server;
 
+import com.adavie.router.Routes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,8 @@ class ServerTest {
 
     @BeforeEach
     void startServer() throws InterruptedException {
-        server = new Server();
+        Routes routes = new Routes();
+        server = new Server(routes);
         serverThread = new Thread(() -> server.start());
         serverThread.start();
 
@@ -110,7 +112,8 @@ class ServerTest {
 
     @Test
     void testPortAlreadyInUse() throws InterruptedException {
-        Server secondServer = new Server();
+        Routes routes = new Routes();
+        Server secondServer = new Server(routes);
         Thread secondServerThread = new Thread(() -> {
             assertThrows(RuntimeException.class, () -> secondServer.start(),
                 "Starting server on occupied port should throw RuntimeException");

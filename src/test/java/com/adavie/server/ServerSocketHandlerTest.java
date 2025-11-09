@@ -1,6 +1,7 @@
 package com.adavie.server;
 
 import com.adavie.config.ServerConfig;
+import com.adavie.router.Routes;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,7 +20,8 @@ class ServerSocketHandlerTest {
 
     @Test
     void testBindExceptionCapturedWhenPortAlreadyInUse() throws Exception {
-        Server firstServer = new Server();
+        Routes routes = new Routes();
+        Server firstServer = new Server(routes);
         Thread firstServerThread = new Thread(() -> firstServer.start());
         firstServerThread.start();
 
@@ -28,7 +30,8 @@ class ServerSocketHandlerTest {
         try {
             ServerSocket newSocket = new ServerSocket();
             ServerConfig serverConfig = ServerConfig.getDefaultServerConfig();
-            ServerHandler handler = new ServerHandler(newSocket, serverConfig);
+            Routes handlerRoutes = new Routes();
+            ServerHandler handler = new ServerHandler(newSocket, serverConfig, handlerRoutes);
 
             Thread handlerThread = new Thread(handler);
             handlerThread.start();
@@ -52,7 +55,8 @@ class ServerSocketHandlerTest {
 
     @Test
     void testThreadPoolHandlesMultipleConcurrentClients() throws Exception {
-        Server server = new Server();
+        Routes routes = new Routes();
+        Server server = new Server(routes);
         Thread serverThread = new Thread(() -> server.start());
         serverThread.start();
 
