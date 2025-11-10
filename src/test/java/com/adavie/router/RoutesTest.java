@@ -272,61 +272,6 @@ public class RoutesTest {
     assertTrue(exception.getMessage().contains("expected type"));
   }
 
-  // ==================== Introspection Tests ====================
-
-  @Test
-  void testGetPaths() {
-    Routes routes = new Routes();
-
-    routes.add("/hello", () -> "Hello");
-    routes.add("/greet", (String name) -> "Hello, " + name);
-
-    assertEquals(2, routes.getPaths().size());
-    assertTrue(routes.getPaths().contains("/hello"));
-    assertTrue(routes.getPaths().contains("/greet"));
-  }
-
-  @Test
-  void testGetRouteSignatures() {
-    Routes routes = new Routes();
-
-    routes.add("/hello", () -> "Hello", new TypeToken<String>() {});
-    routes.add("/greet",
-        (String name) -> "Hello, " + name,
-        new TypeToken<String>() {},
-        new TypeToken<String>() {});
-
-    Map<String, String> signatures = routes.getRouteSignatures();
-    assertEquals(2, signatures.size());
-    assertTrue(signatures.get("/hello").contains("->"));
-    assertTrue(signatures.get("/greet").contains("->"));
-  }
-
-  @Test
-  void testCanInvoke() {
-    Routes routes = new Routes();
-
-    routes.add("/greet",
-        (String name) -> "Hello, " + name,
-        new TypeToken<String>() {},
-        new TypeToken<String>() {});
-
-    assertTrue(routes.canInvoke("/greet", String.class));
-    assertFalse(routes.canInvoke("/greet", Integer.class));
-    assertFalse(routes.canInvoke("/greet", String.class, String.class));
-    assertFalse(routes.canInvoke("/nonexistent", String.class));
-  }
-
-  @Test
-  void testHasRoute() {
-    Routes routes = new Routes();
-
-    routes.add("/hello", () -> "Hello");
-
-    assertTrue(routes.hasRoute("/hello"));
-    assertFalse(routes.hasRoute("/nonexistent"));
-  }
-
   // ==================== Type Safety Tests ====================
 
   @Test

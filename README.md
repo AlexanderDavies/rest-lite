@@ -17,18 +17,21 @@ A lightweight and simple Java HTTP server and RESTful framework with zero depend
 - ✅ Thread-based request handling
 - ✅ Logging
 - ✅ Virtual thread support
-- ✅ Handle clients requests 
+- ✅ Handle clients requests
 - ✅ Parse Headers
+- ✅ Route registration with type safety
+  - Support for 0-4 parameter routes
+  - Explicit type declarations
+  - Generic type preservation with TypeToken
+  - Runtime type validation
 
 ### Planned
-- Register routes
-  - Need to handle functions with no args
-  - Doesn't support string literals
+- Extend support for routes with > four params
 - Handle query params
-- route requests
+- Route requests to registered handlers
 - JSON response parsing
 - Handle path parameters (registration and routing)
-- Handle post requests 
+- Handle post requests
   - parse JSON body and map to request object
   - Handle generics
 - Handle Cookies
@@ -48,43 +51,137 @@ cd rest-lite
 
 ## Usage
 
-### Basic Server
+### Basic Server with Routes
 
-Start a server with default configuration (localhost:8081):
+Start a server with route registration:
 
 ```java
 import com.adavie.server.Server;
+import com.adavie.router.Routes;
 
 public class Main {
     public static void main(String[] args) {
-        Server server = new Server();
+        Routes routes = new Routes();
+
+        routes.add("/hello", () -> "Hello World");
+        routes.add("/greet", (String name) -> "Hello, " + name);
+
+        Server server = new Server(routes);
         server.start();
 
         // Server is now running on localhost:8081
-
-        // To stop the server:
-        // server.stop();
     }
 }
 ```
 
+### Route Registration
+
+#### Simple Route Registration
+
+Register routes with lambdas (types inferred as Object):
+
+```java
+Routes routes = new Routes();
+
+routes.add("/hello", () -> "Hello World");
+
+routes.add("/greet", (String name) -> "Hello, " + name);
+
+routes.add("/add", (Integer a, Integer b) -> a + b);
+
+routes.add("/fullname",
+    (String first, String middle, String last) ->
+        first + " " + middle + " " + last);
+```
+
+#### Explicit Type Registration with TypeToken
+
+Register routes with explicit type information for better type safety:
+
+```java
+import com.adavie.router.TypeToken;
+
+Routes routes = new Routes();
+
+routes.add("/hello",
+    () -> "Hello World",
+    new TypeToken<String>() {});
+
+routes.add("/greet",
+    (String name) -> "Hello, " + name,
+    new TypeToken<String>() {},
+    new TypeToken<String>() {});
+
+routes.add("/concat",
+    (String a, String b) -> a + " " + b,
+    new TypeToken<String>() {},
+    new TypeToken<String>() {},
+    new TypeToken<String>() {});
+```
+
+#### Generic Type Preservation
+
+Use TypeToken to preserve generic types like `List<String>` or `Map<String, Integer>`:
+
+```java
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+
+Routes routes = new Routes();
+
+routes.add("/users",
+    () -> Arrays.asList("Alice", "Bob", "Charlie"),
+    new TypeToken<List<String>>() {});
+
+routes.add("/config",
+    () -> Map.of("version", "1.0", "name", "MyApp"),
+    new TypeToken<Map<String, String>>() {});
+
+routes.add("/filter",
+    (List<Integer> numbers) -> numbers.stream()
+        .filter(n -> n > 10)
+        .collect(Collectors.toList()),
+    new TypeToken<List<Integer>>() {},
+    new TypeToken<List<Integer>>() {});
+```
+
+#### Invoking Routes
+
+Invoke registered routes directly:
+
+```java
+Routes routes = new Routes();
+routes.add("/greet", (String name) -> "Hello, " + name);
+
+Object result = routes.invoke("/greet", "Alice");
+System.out.println(result);
+
+String typedResult = routes.invokeTyped("/greet", String.class, "Bob");
+System.out.println(typedResult);
+```
+
 ### Custom Configuration
 
-Configure hostname, port, and timeout:
+Configure hostname, port, and timeout with routes:
 
 ```java
 import com.adavie.server.Server;
-import com.adavie.server.config.ServerConfig;
+import com.adavie.config.ServerConfig;
+import com.adavie.router.Routes;
 
 public class Main {
     public static void main(String[] args) {
+        Routes routes = new Routes();
+        routes.add("/hello", () -> "Hello World");
+
         ServerConfig config = new ServerConfig.Builder()
             .hostname("localhost")
             .port(9090)
             .clientConnectionTimeout(60)
             .build();
 
-        Server server = new Server(config);
+        Server server = new Server(routes, config);
         server.start();
 
         System.out.println("Server running on localhost:9090");
@@ -98,12 +195,15 @@ Configure the server's thread pool for handling client connections:
 
 ```java
 import com.adavie.server.Server;
-import com.adavie.server.config.ServerConfig;
-import com.adavie.server.config.ThreadPoolConfig;
+import com.adavie.config.ServerConfig;
+import com.adavie.config.ThreadPoolConfig;
+import com.adavie.router.Routes;
 
 public class Main {
     public static void main(String[] args) {
-        // Create custom thread pool configuration
+        Routes routes = new Routes();
+        routes.add("/hello", () -> "Hello World");
+
         ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig.Builder()
             .minPoolSize(25)
             .maxPoolSize(200)
@@ -111,14 +211,13 @@ public class Main {
             .queueSize(50)
             .build();
 
-        // Create server config with custom thread pool
         ServerConfig config = new ServerConfig.Builder()
             .hostname("localhost")
             .port(9090)
             .threadPoolConfig(threadPoolConfig)
             .build();
 
-        Server server = new Server(config);
+        Server server = new Server(routes, config);
         server.start();
 
         System.out.println("Server running on localhost:9090 with custom thread pool");
@@ -132,29 +231,31 @@ Configure the root logger with custom settings for file logging:
 
 ```java
 import com.adavie.server.Server;
-import com.adavie.server.config.ServerConfig;
+import com.adavie.config.ServerConfig;
 import com.adavie.config.LoggerConfig;
+import com.adavie.router.Routes;
 import java.util.logging.Level;
 
 public class Main {
     public static void main(String[] args) {
-        // Create custom logger configuration
+        Routes routes = new Routes();
+        routes.add("/hello", () -> "Hello World");
+
         LoggerConfig loggerConfig = new LoggerConfig.Builder()
             .enabledFileLogging(true)
             .logFilePath("/var/log/myapp/server.log")
             .logLevel(Level.INFO)
-            .fileLimitBytes(5242880)  // 5MB per file
-            .fileCount(10)            // Keep 10 log files
+            .fileLimitBytes(5242880)
+            .fileCount(10)
             .build();
 
-        // Create server config with custom logger
         ServerConfig config = new ServerConfig.Builder()
             .hostname("localhost")
             .port(9090)
             .loggerConfig(loggerConfig)
             .build();
 
-        Server server = new Server(config);
+        Server server = new Server(routes, config);
         server.start();
 
         System.out.println("Server running with custom logging configuration");
